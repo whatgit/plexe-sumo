@@ -179,6 +179,9 @@ bool MSCACCLaneChanger::change() {
         if (currentToDestination < 0) {
 
             //we need to move to the left
+            //@mayara:let's do it without checking anything
+            startChange(vehicle, myCandi, 1);
+            return true;
 
             // check whether the vehicle wants and is able to change to left lane
             int blockedCheck = 0;
@@ -200,7 +203,9 @@ bool MSCACCLaneChanger::change() {
                 //disable ignore modification from now on. follow speed will not be called
                 model->setIgnoreModifications(vehicle, false);
 
-                bool changingAllowed = (blockedCheck & LCA_BLOCKED) == 0;
+                //@mayara
+                //bool changingAllowed = (blockedCheck & LCA_BLOCKED) == 0;
+                bool changingAllowed = true;
 
                 //vehicle->getLaneChangeModel().setOwnState(state2|state1);
                 // change if the vehicle wants to and is allowed to change
@@ -219,6 +224,9 @@ bool MSCACCLaneChanger::change() {
         if (currentToDestination > 0) {
 
             //we need to move to the right
+            //@mayara:let's do it without checking anything
+            startChange(vehicle, myCandi, -1);
+            return true;
 
             // check whether the vehicle wants and is able to change to right lane
             int blockedCheck = 0;
@@ -239,7 +247,9 @@ bool MSCACCLaneChanger::change() {
                 //disable ignore modification from now on. follow speed will not be called
                 model->setIgnoreModifications(vehicle, false);
 
-                bool changingAllowed2 = (blockedCheck & LCA_BLOCKED) == 0;
+                //@mayara 
+                //bool changingAllowed2 = (blockedCheck & LCA_BLOCKED) == 0;
+                bool changingAllowed2 = true;
 
                 //vehicle->getLaneChangeModel().setOwnState(state2|state1);
                 // change if the vehicle wants to and is allowed to change

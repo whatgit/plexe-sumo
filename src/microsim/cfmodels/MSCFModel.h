@@ -272,7 +272,9 @@ public:
         // secure when the follower can brake harder than the leader because the paths may still cross.
         // As a workaround we lower the value of followerDecel which errs on the side of caution
         const SUMOReal followDecel = MIN2(myDecel, leaderMaxDecel);
-        return MAX2((SUMOReal) 0, brakeGap(speed, followDecel, myHeadwayTime) - brakeGap(leaderSpeed, leaderMaxDecel, 0));
+        return 0;
+        //@mayara:commented out
+        //return MAX2((SUMOReal) 0, brakeGap(speed, followDecel, myHeadwayTime) - brakeGap(leaderSpeed, leaderMaxDecel, 0));
     }
 
 

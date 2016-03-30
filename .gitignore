@@ -45,4 +45,14 @@ src/sumo
 src/sumo-gui
 src/tags
 src/traci_testclient/TraCITestClient
+bin/emissionsDrivingCycle
+bin/emissionsMap
+bin/marouter
+bin/netgenerate
+compile
+src/marouter/marouter
+src/netgen/netgenerate
+src/tools/emissionsDrivingCycle
+src/tools/emissionsMap
+
 
