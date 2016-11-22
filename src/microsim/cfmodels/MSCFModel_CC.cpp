@@ -336,6 +336,24 @@ MSCFModel_CC::_v(const MSVehicle* const veh, SUMOReal gap2pred, SUMOReal egoSpee
 
                 break;
 
+            case Plexe::QICHEN:
+
+                if (invoker == MSCFModel_CC::FOLLOW_SPEED)
+                    predAcceleration = vars->frontAcceleration;
+                else
+                    /* if the method has not been invoked from followSpeed() then it has been
+                     * invoked from stopSpeed(). In such case we set all parameters of preceding
+                     * vehicles as they were non-moving obstacles
+                     */
+                    predAcceleration = 0;
+
+                //TODO: again modify probably range/range-rate controller is needed
+                ccAcceleration = _cc(veh, egoSpeed, vars->ccDesiredSpeed);
+                caccAcceleration = _qichen(veh, egoSpeed, predSpeed, predAcceleration, gap2pred);
+
+                break;
+
+
             case Plexe::DRIVER:
 
                 std::cerr << "Switching to normal driver behavior still not implemented in MSCFModel_CC\n";
@@ -419,6 +437,17 @@ MSCFModel_CC::_ploeg(const MSVehicle *veh, SUMOReal egoSpeed, SUMOReal predSpeed
         vars->ploegKd * (predSpeed - egoSpeed - vars->ploegH * vars->egoAcceleration) +
         predAcceleration
     )) * TS ;
+
+}
+
+SUMOReal
+MSCFModel_CC::_qichen(const MSVehicle *veh, SUMOReal egoSpeed, SUMOReal predSpeed, SUMOReal predAcceleration, SUMOReal gap2pred) const {
+
+    VehicleVariables* vars = (VehicleVariables*)veh->getCarFollowVariables();
+
+    return std::min(myAccel, std::max(-myDecel,
+        (predAcceleration + vars->qichen_Kv*(predSpeed - egoSpeed) + vars->qichen_Kr*(gap2pred - vars->qichen_Rdes))
+        ));
 
 }
 
@@ -527,6 +556,18 @@ void MSCFModel_CC::setGenericInformation(const MSVehicle* veh, const struct Plex
     }
     case CC_SET_PLOEG_KD: {
         vars->ploegKd = *(double*)content;
+        break;
+    }
+    case CC_SET_QICHEN_KV: {
+        vars->qichen_Kv = *(double*)content;
+        break;
+    }
+    case CC_SET_QICHEN_KR: {
+        vars->qichen_Kr = *(double*)content;
+        break;
+    }
+    case CC_SET_QICHEN_RDES: {
+        vars->qichen_Rdes = *(double*)content;
         break;
     }
     default: {

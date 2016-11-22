@@ -459,7 +459,7 @@ public:
             leaderDataReadTime(0), frontDataReadTime(0), position(-1), nCars(8),
             caccXi(-1), caccOmegaN(-1), caccC1(-1), engineTau(-1), caccAlpha1(-1), caccAlpha2(-1),
             caccAlpha3(-1), caccAlpha4(-1), caccAlpha5(-1), engineAlpha(-1), engineOneMinusAlpha(-1),
-            ploegH(0.5), ploegKp(0.2), ploegKd(0.7) {
+            ploegH(0.5), ploegKp(0.2), ploegKd(0.7), qichen_Kv(0.4), qichen_Kr(0.01), qichen_Rdes(10) {
             fakeData.frontAcceleration = 0;
             fakeData.frontDistance = 0;
             fakeData.frontSpeed = 0;
@@ -583,6 +583,11 @@ public:
         double ploegH;
         double ploegKp;
         double ploegKd;
+
+        /// @brief QiChen's parameters
+        double qichen_Kr;
+        double qichen_Kv;
+        double qichen_Rdes; 
     };
 
 
@@ -631,6 +636,16 @@ private:
      * @return the variation of desired acceleration
      */
     SUMOReal _ploeg(const MSVehicle *veh, SUMOReal egoSpeed, SUMOReal predSpeed, SUMOReal predAcceleration, SUMOReal gap2pred) const;
+
+    /** @brief controller for the QiChen's Platoon Disaggregation..
+     *
+     * @param[in] egoSpeed vehicle current speed
+     * @param[in] predSpeed the speed of the front vehicle
+     * @param[in] predAcceleration acceleration of preceding vehicle
+     * @param[in] gap2pred the distance to preceding vehicle
+     * @return the variation of desired acceleration
+     */
+    SUMOReal _qichen(const MSVehicle *veh, SUMOReal egoSpeed, SUMOReal predSpeed, SUMOReal predAcceleration, SUMOReal gap2pred) const;
 
     /** @brief computes the actual acceleration the actuator is able to apply to the car, given engine time constant and previous
      * acceleration

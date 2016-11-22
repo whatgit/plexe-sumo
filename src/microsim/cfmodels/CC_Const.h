@@ -35,7 +35,7 @@ enum PLATOONING_LANE_CHANGE_ACTION {
  * leave the control to the mobility model which reproduces a human driver
  */
 enum ACTIVE_CONTROLLER
-{DRIVER = 0, ACC = 1, CACC = 2, FAKED_CACC = 3, PLOEG = 4};
+{DRIVER = 0, ACC = 1, CACC = 2, FAKED_CACC = 3, PLOEG = 4, QICHEN = 5};
 
 /**
  * @brief struct used as header for generic data passing to this model through
@@ -82,6 +82,10 @@ struct VEHICLE_DATA {
 #define CC_SET_PLOEG_H                   0x20    //time headway of ploeg's CACC
 #define CC_SET_PLOEG_KP                  0x21    //kp parameter of ploeg's CACC
 #define CC_SET_PLOEG_KD                  0x22    //kd parameter of ploeg's CACC
+
+#define CC_SET_QICHEN_KV                 0x30
+#define CC_SET_QICHEN_KR                 0x31
+#define CC_SET_QICHEN_RDES               0x32
 
 }
 
