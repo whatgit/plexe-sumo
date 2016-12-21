@@ -351,7 +351,12 @@ MSCFModel_CC::_v(const MSVehicle* const veh, SUMOReal gap2pred, SUMOReal egoSpee
                 ccAcceleration = _cc(veh, egoSpeed, vars->ccDesiredSpeed);
                 caccAcceleration = _qichen(veh, egoSpeed, predSpeed, predAcceleration, gap2pred);
 
-                controllerAcceleration = caccAcceleration;
+                if (gap2pred > 100) {
+                    controllerAcceleration = ccAcceleration;
+                }
+                else {
+                    controllerAcceleration = caccAcceleration;
+                }
 
                 break;
 
