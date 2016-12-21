@@ -351,6 +351,8 @@ MSCFModel_CC::_v(const MSVehicle* const veh, SUMOReal gap2pred, SUMOReal egoSpee
                 ccAcceleration = _cc(veh, egoSpeed, vars->ccDesiredSpeed);
                 caccAcceleration = _qichen(veh, egoSpeed, predSpeed, predAcceleration, gap2pred);
 
+                controllerAcceleration = caccAcceleration;
+
                 break;
 
 
@@ -446,7 +448,7 @@ MSCFModel_CC::_qichen(const MSVehicle *veh, SUMOReal egoSpeed, SUMOReal predSpee
     VehicleVariables* vars = (VehicleVariables*)veh->getCarFollowVariables();
 
     return std::min(myAccel, std::max(-myDecel,
-        (predAcceleration + vars->qichen_Kv*(predSpeed - egoSpeed) + vars->qichen_Kr*(gap2pred - vars->qichen_Rdes))
+   		(predAcceleration + vars->qichen_Kv*(predSpeed - egoSpeed) + vars->qichen_Kr*(gap2pred - vars->qichen_Rdes))
         ));
 
 }
