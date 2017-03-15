@@ -55,4 +55,4 @@ src/netgen/netgenerate
 src/tools/emissionsDrivingCycle
 src/tools/emissionsMap
 
-
+sumo/*
