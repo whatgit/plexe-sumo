@@ -286,7 +286,7 @@ MSCFModel_CC::_v(const MSVehicle* const veh, SUMOReal gap2pred, SUMOReal egoSpee
                 ccAcceleration = _cc(veh, egoSpeed, vars->ccDesiredSpeed);
                 caccAcceleration = _cacc(veh, egoSpeed, predSpeed, predAcceleration, gap2pred, leaderSpeed, leaderAcceleration, vars->caccSpacing);
                 //if CACC is enabled and we are closer than 20 meters, let it decide
-                if (gap2pred < 20) {
+                if (gap2pred < 35) {
                     controllerAcceleration = caccAcceleration;
                 }
                 else {
@@ -314,8 +314,11 @@ MSCFModel_CC::_v(const MSVehicle* const veh, SUMOReal gap2pred, SUMOReal egoSpee
 
             case Plexe::PLOEG:
 
-                if (invoker == MSCFModel_CC::FOLLOW_SPEED)
+                if (invoker == MSCFModel_CC::FOLLOW_SPEED) {
                     predAcceleration = vars->frontAcceleration;
+                    //overwrite pred speed using data obtained through wireless communication
+                    predSpeed = vars->frontSpeed;
+                }
                 else
                     /* if the method has not been invoked from followSpeed() then it has been
                      * invoked from stopSpeed(). In such case we set all parameters of preceding
@@ -328,7 +331,7 @@ MSCFModel_CC::_v(const MSVehicle* const veh, SUMOReal gap2pred, SUMOReal egoSpee
                 //ploeg's controller computes \dot{u}_i, so we need to sum such value to the previously computed u_i
                 caccAcceleration = vars->controllerAcceleration + _ploeg(veh, egoSpeed, predSpeed, predAcceleration, gap2pred);
                 //if CACC is enabled and we are closer than 20 meters, let it decide
-                if (gap2pred < 20) {
+                if (gap2pred < 35) {
                     controllerAcceleration = caccAcceleration;
                 }
                 else {
@@ -420,7 +423,7 @@ MSCFModel_CC::_ploeg(const MSVehicle *veh, SUMOReal egoSpeed, SUMOReal predSpeed
 
     return (1/vars->ploegH * (
         -vars->controllerAcceleration +
-        vars->ploegKp * (gap2pred - (2 + vars->ploegH * egoSpeed)) +
+        vars->ploegKp * (gap2pred - (2.5 + vars->ploegH * egoSpeed)) +
         vars->ploegKd * (predSpeed - egoSpeed - vars->ploegH * vars->egoAcceleration) +
         predAcceleration
     )) * TS ;
