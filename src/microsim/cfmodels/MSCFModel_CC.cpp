@@ -316,8 +316,6 @@ MSCFModel_CC::_v(const MSVehicle* const veh, SUMOReal gap2pred, SUMOReal egoSpee
 
                 if (invoker == MSCFModel_CC::FOLLOW_SPEED) {
                     predAcceleration = vars->frontAcceleration;
-                    //overwrite pred speed using data obtained through wireless communication
-                    predSpeed = vars->frontSpeed;
                 }
                 else
                     /* if the method has not been invoked from followSpeed() then it has been
