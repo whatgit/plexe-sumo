@@ -128,7 +128,7 @@ bool MSCACCLaneChanger::change() {
         //see below for an explanation of this offset variable
         int offset = vehicle->getEdge()->getLanes().size() - ((const MSCFModel_CC&)vehicle->getCarFollowModel()).getMyLanesCount();
         if (vehicle->getLaneIndex() == vars->fixedLane + offset) {
-            setLaneChangeAction(vehicle, Plexe::STAY_IN_CURRENT_LANE);
+            //setLaneChangeAction(vehicle, Plexe::STAY_IN_CURRENT_LANE);
         }
 
         break;

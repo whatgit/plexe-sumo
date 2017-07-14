@@ -57,8 +57,8 @@ MSCFModel_CC::MSCFModel_CC(const MSVehicleType* vtype,
     }
 
     //instantiate the driver model. For now, use Krauss as default, then needs to be parameterized
-    myHumanDriver = new MSCFModel_Krauss(vtype, accel, decel, 0.5, 1.5);
-
+    //myHumanDriver = new MSCFModel_Krauss(vtype, accel, decel, 0.5, 1.5);
+    myHumanDriver = new MSCFModel_Krauss(vtype, accel, decel, 0, 0);
 }
 
 MSCFModel_CC::~MSCFModel_CC() {}
@@ -359,6 +359,10 @@ MSCFModel_CC::_v(const MSVehicle* const veh, SUMOReal gap2pred, SUMOReal egoSpee
                 );
                 controllerAcceleration = caccAcceleration;
 
+                break;
+                
+            case Plexe::CC:
+                controllerAcceleration = std::min(myCcAccel, std::max(-myCcDecel, -(egoSpeed - desSpeed)));
                 break;
 
             case Plexe::DRIVER:
