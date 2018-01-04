@@ -323,7 +323,7 @@ MSCFModel_CC::_v(const MSVehicle* const veh, SUMOReal gap2pred, SUMOReal egoSpee
             case Plexe::PLOEG:
 
                 if (invoker == MSCFModel_CC::FOLLOW_SPEED)
-                    predAcceleration = vars->frontAcceleration;
+                    predAcceleration = vars->frontAcceleration;     //get acceleration from the V2V communication
                 else
                     /* if the method has not been invoked from followSpeed() then it has been
                      * invoked from stopSpeed(). In such case we set all parameters of preceding
@@ -363,6 +363,45 @@ MSCFModel_CC::_v(const MSVehicle* const veh, SUMOReal gap2pred, SUMOReal egoSpee
                 
             case Plexe::CC:
                 controllerAcceleration = std::min(myCcAccel, std::max(-myCcDecel, -(egoSpeed - desSpeed)));
+                break;
+
+            case Plexe::HH_GCDC:
+
+                if (invoker == MSCFModel_CC::FOLLOW_SPEED)
+                    predAcceleration = vars->frontAcceleration;     //get acceleration from the V2V communication
+                    predSpeed = vars->frontSpeed;                   //get speed from the V2V communication
+                else
+                    /* if the method has not been invoked from followSpeed() then it has been
+                     * invoked from stopSpeed(). In such case we set all parameters of preceding
+                     * vehicles as they were non-moving obstacles
+                     */
+                    predAcceleration = 0;
+
+                vars->gcdcDelta += gap2pred - vars->gcdcDesiredGap;
+               //TODO: again modify probably range/range-rate controller is needed
+                ccAcceleration = _cc(veh, egoSpeed, vars->ccDesiredSpeed);
+                //ploeg's controller computes \dot{u}_i, so we need to sum such value to the previously computed u_i
+                caccAcceleration =  (vars->gcdcKP3*predAcceleration) + _gcdc(veh, egoSpeed, predSpeed, predAcceleration, gap2pred, STEPS2TIME(MSNet::getInstance()->getCurrentTimeStep() + DELTA_T) + _oa(veh, predAcceleration, gap2pred);
+                if(caccAcceleration > 2) {
+                    caccAcceleration = 2;
+                }
+                else if (caccAcceleration < -2)
+                {
+                    caccAcceleration = -2;
+                }
+                //check if we received at least one packet
+                if (vars->frontInitialized) {
+                    //if CACC is enabled and we are closer than 20 meters, let it decide
+                    if (gap2pred < 35)
+                        controllerAcceleration = caccAcceleration;
+                    else
+                        controllerAcceleration = std::min(ccAcceleration, caccAcceleration);
+                }
+                else {
+                    controllerAcceleration = 0;
+                }
+
+
                 break;
 
             case Plexe::DRIVER:
@@ -448,6 +487,32 @@ MSCFModel_CC::_ploeg(const MSVehicle *veh, SUMOReal egoSpeed, SUMOReal predSpeed
         vars->ploegKd * (predSpeed - egoSpeed - vars->ploegH * vars->egoAcceleration) +
         predAcceleration
     )) * TS ;
+
+}
+
+SUMOReal
+MSCFModel_CC::_gcdc(const MSVehicle *veh, SUMOReal egoSpeed, SUMOReal predSpeed, SUMOReal predAcceleration, SUMOReal gap2pred, SUMOReal time) const {
+
+    CC_VehicleVariables* vars = (CC_VehicleVariables*)veh->getCarFollowVariables();
+
+    double v_des = gcdcKP2*(gap2pred-vars->gcdcDesiredGap) + gcdcKI2*vars->gcdcDelta;
+
+    //implement the controller here
+    return vars->gcdcKP1*((predSpeed - egoSpeed - v_des)-7.5*exp(-10*time));
+
+}
+
+SUMOReal
+MSCFModel_CC::_oa(const MSVehicle *veh, SUMOReal predAcceleration, SUMOReal gap2pred) const {
+
+    CC_VehicleVariables* vars = (CC_VehicleVariables*)veh->getCarFollowVariables();
+
+    if(predAcceleration < 0 && gap2pred < vars->gcdcDesiredGap) {
+        return -vars->gcdcBeta*((vars->gcdcAlpha*gap2pred) + 1)*exp(-vars->gcdcAlpha*gap2pred);
+    }
+    else {
+        return 0;
+    }
 
 }
 
@@ -655,6 +720,34 @@ void MSCFModel_CC::setGenericInformation(const MSVehicle* veh, const struct Plex
     }
     case CC_SET_PLOEG_KD: {
         vars->ploegKd = *(double*)content;
+        break;
+    }
+    case CC_SET_GCDC_KP1: {
+        vars->gcdcKP1 = *(double*)content;
+        break;
+    }
+    case CC_SET_GCDC_KP2: {
+        vars->gcdcKP2 = *(double*)content;
+        break;
+    }
+    case CC_SET_GCDC_KI2: {
+        vars->gcdcKI2 = *(double*)content;
+        break;
+    }
+    case CC_SET_GCDC_KP3: {
+        vars->gcdcKP3 = *(double*)content;
+        break;
+    }
+    case CC_SET_GCDC_OA_alph: {
+        vars->gcdcAlpha = *(double*)content;
+        break;
+    }
+    case CC_SET_GCDC_OA_beta: {
+        vars->gcdcBeta = *(double*)content;
+        break;
+    }
+    case CC_SET_GCDC_GAP: {
+        vars->gcdcDesiredGap = *(double*)content;
         break;
     }
     case CC_SET_VEHICLE_ENGINE_MODEL: {

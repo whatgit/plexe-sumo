@@ -96,7 +96,8 @@ public:
         caccXi(-1), caccOmegaN(-1), caccC1(-1), engineTau(-1), caccAlpha1(-1), caccAlpha2(-1),
         caccAlpha3(-1), caccAlpha4(-1), caccAlpha5(-1), engineAlpha(-1), engineOneMinusAlpha(-1),
         ploegH(0.5), ploegKp(0.2), ploegKd(0.7), nInitialized(0), engine(0),
-        frontInitialized(false), leaderInitialized(false), caccInitialized(false) {
+        frontInitialized(false), leaderInitialized(false), caccInitialized(false), 
+        gcdcKP1(0.872), gcdcKP2(2.9497), gcdcKI2(4.3615), gcdcKP3(0.4981), gcdcAlpha(0.3), gcdcBeta(30), gcdcDesiredGap(10), gcdcDelta(0) {
         fakeData.frontAcceleration = 0;
         fakeData.frontDistance = 0;
         fakeData.frontSpeed = 0;
@@ -253,6 +254,9 @@ public:
 
     /// @brief engine model employed by this car
     GenericEngineModel *engine;
+
+    /// @brief parameters for GCDC controller
+    double gcdcKP1, gcdcKP2, gcdcKI2, gcdcKP3, gcdcAlpha, gcdcBeta, gcdcDesiredGap, gcdcDelta;
 };
 
 #endif

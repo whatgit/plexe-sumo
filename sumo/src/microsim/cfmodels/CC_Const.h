@@ -35,7 +35,7 @@ enum PLATOONING_LANE_CHANGE_ACTION {
  * leave the control to the mobility model which reproduces a human driver
  */
 enum ACTIVE_CONTROLLER
-{DRIVER = 0, ACC = 1, CACC = 2, FAKED_CACC = 3, PLOEG = 4, CONSENSUS = 5, CC = 6};
+{DRIVER = 0, ACC = 1, CACC = 2, FAKED_CACC = 3, PLOEG = 4, CONSENSUS = 5, CC = 6, HH_GCDC = 7};
 
 /**
  * @brief struct used as header for generic data passing to this model through
@@ -89,6 +89,14 @@ struct VEHICLE_DATA {
 
 #define CC_SET_VEHICLE_MODEL             0x31    //set the vehicle model, i.e., engine characteristics
 #define CC_SET_VEHICLES_FILE             0x32    //set the location of the vehicle parameters file
+
+#define CC_SET_GCDC_KP1                  0x40   //Kp1
+#define CC_SET_GCDC_KP2                  0x41   //Kp2
+#define CC_SET_GCDC_KI2                  0x42   //Ki2
+#define CC_SET_GCDC_KP3                  0x43   //Kp3 
+#define CC_SET_GCDC_OA_alph              0x44   //alpha of the obstacle avoidance
+#define CC_SET_GCDC_OA_beta              0x45   //beta of the obstacle avoidance
+#define CC_SET_GCDC_GAP                  0x46   //desired gap of the controller
 
 //parameter names for engine models
 #define FOLM_PAR_TAU                     "tau_s"

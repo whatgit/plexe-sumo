@@ -513,6 +513,24 @@ private:
      */
     SUMOReal d_i_j(const struct Plexe::VEHICLE_DATA *vehicles, const double h[MAX_N_CARS], int i, int j) const;
 
+    /** @brief Halmstad team's controller used in the GCDC 2016 competition
+     *
+     * @param[in] egoSpeed vehicle current speed
+     * @param[in] predSpeed the speed of the front vehicle
+     * @param[in] predAcceleration acceleration of preceding vehicle
+     * @param[in] gap2pred the distance to preceding vehicle
+     * @return the value of desired acceleration
+     */
+    SUMOReal _gcdc(const MSVehicle *veh, SUMOReal egoSpeed, SUMOReal predSpeed, SUMOReal predAcceleration, SUMOReal gap2pred, SUMOReal time) const;
+
+    /** @brief Obstacle avoidance controller to be used with the Halmstad team's controller used in the GCDC 2016 competition
+     *
+     * @param[in] gap2pred the distance to preceding vehicle
+     * @param[in] predAcceleration acceleration of preceding vehicle
+     * @return the value of desired acceleration
+     */
+    SUMOReal _oa(const MSVehicle *veh, SUMOReal predAcceleration, SUMOReal gap2pred) const;
+
     /** @brief computes the actual acceleration the actuator is able to apply to the car, given engine time constant and previous
      * acceleration
      *
