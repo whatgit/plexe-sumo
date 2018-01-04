@@ -367,21 +367,25 @@ MSCFModel_CC::_v(const MSVehicle* const veh, SUMOReal gap2pred, SUMOReal egoSpee
 
             case Plexe::HH_GCDC:
 
-                if (invoker == MSCFModel_CC::FOLLOW_SPEED)
+                if (invoker == MSCFModel_CC::FOLLOW_SPEED) {
                     predAcceleration = vars->frontAcceleration;     //get acceleration from the V2V communication
                     predSpeed = vars->frontSpeed;                   //get speed from the V2V communication
-                else
+                }                  
+                else {
                     /* if the method has not been invoked from followSpeed() then it has been
                      * invoked from stopSpeed(). In such case we set all parameters of preceding
                      * vehicles as they were non-moving obstacles
                      */
                     predAcceleration = 0;
+                    predSpeed = 0;
+                }
+                
+                vars->gcdcDelta += gap2pred - vars->gcdcDesiredGap; //previous errors
 
-                vars->gcdcDelta += gap2pred - vars->gcdcDesiredGap;
-               //TODO: again modify probably range/range-rate controller is needed
+                //TODO: again modify probably range/range-rate controller is needed
                 ccAcceleration = _cc(veh, egoSpeed, vars->ccDesiredSpeed);
                 //ploeg's controller computes \dot{u}_i, so we need to sum such value to the previously computed u_i
-                caccAcceleration =  (vars->gcdcKP3*predAcceleration) + _gcdc(veh, egoSpeed, predSpeed, predAcceleration, gap2pred, STEPS2TIME(MSNet::getInstance()->getCurrentTimeStep() + DELTA_T) + _oa(veh, predAcceleration, gap2pred);
+                caccAcceleration =  (vars->gcdcKP3*predAcceleration) + _gcdc(veh, egoSpeed, predSpeed, predAcceleration, gap2pred, STEPS2TIME(MSNet::getInstance()->getCurrentTimeStep() + DELTA_T)) + _oa(veh, predAcceleration, gap2pred);
                 if(caccAcceleration > 2) {
                     caccAcceleration = 2;
                 }
@@ -495,7 +499,7 @@ MSCFModel_CC::_gcdc(const MSVehicle *veh, SUMOReal egoSpeed, SUMOReal predSpeed,
 
     CC_VehicleVariables* vars = (CC_VehicleVariables*)veh->getCarFollowVariables();
 
-    double v_des = gcdcKP2*(gap2pred-vars->gcdcDesiredGap) + gcdcKI2*vars->gcdcDelta;
+    double v_des = vars->gcdcKP2*(gap2pred-vars->gcdcDesiredGap) + vars->gcdcKI2*vars->gcdcDelta;
 
     //implement the controller here
     return vars->gcdcKP1*((predSpeed - egoSpeed - v_des)-7.5*exp(-10*time));
