@@ -379,24 +379,28 @@ MSCFModel_CC::_v(const MSVehicle* const veh, SUMOReal gap2pred, SUMOReal egoSpee
                     predAcceleration = 0;
                     predSpeed = 0;
                 }
-                
-                vars->gcdcDelta += gap2pred - vars->gcdcDesiredGap; //previous errors
+                if(predSpeed == 0) {   //we didn't received an update
+                    vars->gcdcDelta += 0;
+                    caccAcceleration = 0;
+                }
+                else {
+                    vars->gcdcDelta += gap2pred - vars->gcdcDesiredGap; //previous errors over time
+                    caccAcceleration =  (vars->gcdcKP3*predAcceleration) + _gcdc(veh, egoSpeed, predSpeed, predAcceleration, gap2pred, STEPS2TIME(MSNet::getInstance()->getCurrentTimeStep() + DELTA_T)) + _oa(veh, predAcceleration, gap2pred);
 
+                    if(caccAcceleration > 2) {
+                        caccAcceleration = 2;
+                    }
+                    else if (caccAcceleration < -2)
+                    {
+                        caccAcceleration = -2;
+                    }   
+                }
                 //TODO: again modify probably range/range-rate controller is needed
                 ccAcceleration = _cc(veh, egoSpeed, vars->ccDesiredSpeed);
-                //ploeg's controller computes \dot{u}_i, so we need to sum such value to the previously computed u_i
-                caccAcceleration =  (vars->gcdcKP3*predAcceleration) + _gcdc(veh, egoSpeed, predSpeed, predAcceleration, gap2pred, STEPS2TIME(MSNet::getInstance()->getCurrentTimeStep() + DELTA_T)) + _oa(veh, predAcceleration, gap2pred);
-                if(caccAcceleration > 2) {
-                    caccAcceleration = 2;
-                }
-                else if (caccAcceleration < -2)
-                {
-                    caccAcceleration = -2;
-                }
                 //check if we received at least one packet
-                if (vars->frontInitialized) {
-                    //if CACC is enabled and we are closer than 20 meters, let it decide
-                    if (gap2pred < 35)
+                if (vars->caccInitialized) {
+                    //if CACC is enabled and we are closer than 50 meters, let it decide
+                    if (gap2pred < 50)
                         controllerAcceleration = caccAcceleration;
                     else
                         controllerAcceleration = std::min(ccAcceleration, caccAcceleration);
@@ -474,6 +478,7 @@ MSCFModel_CC::_cacc(const MSVehicle *veh, SUMOReal egoSpeed, SUMOReal predSpeed,
     double epsilon = -gap2pred + spacing; //NOTICE: error (if any) should already be included in gap2pred
     //compute epsilon_dot, i.e., the desired speed error
     double epsilon_dot = egoSpeed - predSpeed;
+
     //Eq. 7.39 of the Rajamani book
     return vars->caccAlpha1 * predAcceleration + vars->caccAlpha2 * leaderAcceleration +
            vars->caccAlpha3 * epsilon_dot + vars->caccAlpha4 * (egoSpeed - leaderSpeed) + vars->caccAlpha5 * epsilon;
@@ -502,8 +507,7 @@ MSCFModel_CC::_gcdc(const MSVehicle *veh, SUMOReal egoSpeed, SUMOReal predSpeed,
     double v_des = vars->gcdcKP2*(gap2pred-vars->gcdcDesiredGap) + vars->gcdcKI2*vars->gcdcDelta;
 
     //implement the controller here
-    return vars->gcdcKP1*((predSpeed - egoSpeed - v_des)-7.5*exp(-10*time));
-
+    return vars->gcdcKP1*((predSpeed - egoSpeed + v_des) - (7.5*exp(-10*time)));
 }
 
 SUMOReal
@@ -511,7 +515,7 @@ MSCFModel_CC::_oa(const MSVehicle *veh, SUMOReal predAcceleration, SUMOReal gap2
 
     CC_VehicleVariables* vars = (CC_VehicleVariables*)veh->getCarFollowVariables();
 
-    if(predAcceleration < 0 && gap2pred < vars->gcdcDesiredGap) {
+    if((predAcceleration < 0) && (gap2pred < vars->gcdcDesiredGap)) {
         return -vars->gcdcBeta*((vars->gcdcAlpha*gap2pred) + 1)*exp(-vars->gcdcAlpha*gap2pred);
     }
     else {
