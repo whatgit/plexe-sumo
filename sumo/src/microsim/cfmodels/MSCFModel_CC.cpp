@@ -288,8 +288,8 @@ MSCFModel_CC::_v(const MSVehicle* const veh, SUMOReal gap2pred, SUMOReal egoSpee
                     //TODO: again modify probably range/range-rate controller is needed
                     ccAcceleration = _cc(veh, egoSpeed, vars->ccDesiredSpeed);
                     caccAcceleration = _cacc(veh, egoSpeed, predSpeed, predAcceleration, gap2pred, leaderSpeed, leaderAcceleration, vars->caccSpacing);
-                    //if CACC is enabled and we are closer than 20 meters, let it decide
-                    if (gap2pred < 35) {
+                    //if CACC is enabled and we are closer than 160 meters, let it decide
+                    if (gap2pred < 160) {
                         controllerAcceleration = caccAcceleration;
                     }
                     else {
@@ -337,8 +337,8 @@ MSCFModel_CC::_v(const MSVehicle* const veh, SUMOReal gap2pred, SUMOReal egoSpee
                 caccAcceleration = vars->controllerAcceleration + _ploeg(veh, egoSpeed, predSpeed, predAcceleration, gap2pred);
                 //check if we received at least one packet
                 if (vars->frontInitialized) {
-                    //if CACC is enabled and we are closer than 20 meters, let it decide
-                    if (gap2pred < 35)
+                    //if CACC is enabled and we are closer than 160 meters, let it decide
+                    if (gap2pred < 180)
                         controllerAcceleration = caccAcceleration;
                     else
                         controllerAcceleration = std::min(ccAcceleration, caccAcceleration);

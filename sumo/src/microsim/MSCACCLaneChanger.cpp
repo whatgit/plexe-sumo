@@ -164,6 +164,14 @@ bool MSCACCLaneChanger::change() {
          */
         int offset = vehicle->getEdge()->getLanes().size() - ((const MSCFModel_CC&)vehicle->getCarFollowModel()).getMyLanesCount();
 
+        /*
+        * When moving from the smaller road to bigger road, e.g. 3 lane road to 2, and you want platoon to be on the rightmost lane in all road
+        * Then defining the lanesCount that would work is very tricky. And if this offset get minus value, it seems to cause SUMO an error
+        */
+        if (offset < 0) {
+            offset = 0;
+        }
+
         //compute where we want to go
         destination = vars->fixedLane + offset;
         /**
